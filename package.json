@@ -1,0 +1,11 @@
+{
+  "name": "mercari-checker",
+  "version": "1.0.0",
+  "description": "メルカリの商品をチェック",
+  "main": "app.js",
+  "scripts": {
+    "test": "node test.js"
+  },
+  "author": "YoheiTerashima",
+  "license": "ISC"
+}
