@@ -1,7 +1,12 @@
 'use strict';
-const number = 100;
-let sum = 0;
-for (let i = 1; i <= number; i++) {
-    sum = sum + i;
-}
-console.log(sum);
+
+const puppeteer = require('puppeteer');
+
+(async () => {
+  const browser = await puppeteer.launch();
+  const page = await browser.newPage();
+  await page.goto('https://www.tumolink.com');
+  await page.screenshot({path: 'tumolink.png'});
+ 
+  await browser.close();
+})();
