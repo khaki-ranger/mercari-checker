@@ -1,4 +1,6 @@
 node_modules/
 setting.js
+sample.js
 *.swp
 *.swo
+*.png
