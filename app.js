@@ -1,34 +1,78 @@
 'use strict';
 
+const fs = require('fs');
+const path = require('path');
 const puppeteer = require('puppeteer');
 const settings = require('./settings');
 const excludeWord = new RegExp(settings.target.excludeWord); 
+const filePath = path.join(__dirname, 'items.json');
 
-(async () => {
-  const browser = await puppeteer.launch();
-  const page = await browser.newPage();
-  await page.goto(settings.target.url);
-  await page.waitForSelector('body > div > main > div.l-content');
-
-  const items = await page.$$('body > div > main > div.l-content > section > div > section > a > figure > img');
-
-  for (const item of items) {
-    const propAlt = await item.getProperty('alt');
-    const title = await propAlt.jsonValue();
-    if (!excludeWord.test(title)){
-      const propSrc = await item.getProperty('src');
-      const src = await propSrc.jsonValue();
-      const result = src.match(/^https:\/\/static-mercari-jp-imgtr2.akamaized.net\/thumb\/photos\/(.+)_\d?\.jpg/);
-      if(result){
-        const obj = {
-          id: result[1],
-          title: title,
-          src: result[0],
-        };
-        console.log(obj);
+fs.readFile(filePath, (error, result) => {
+  if (error) {
+    console.log('error: ' + filePath + ' の読み込みに失敗');
+    const content = JSON.stringify([]);
+    fs.writeFile(filePath, content, (error) => {
+      if (error) {
+        console.log('error: ファイル書き込みエラーです');
+      } else {
+        console.log('success: ' + filePath + ' を新規作成');
       }
-    }
-  }
+    });
+  } else {
+    console.log('success: ' + filePath + ' の読み込みに成功');
+    const items = JSON.parse(result);
 
-  await browser.close();
-})();
+    const oldItemsId = [];
+    for (const item of items) {
+      oldItemsId.push(item.id);
+    }
+
+    (async () => {
+      const newItems = [];
+      const browser = await puppeteer.launch();
+      const page = await browser.newPage();
+      await page.goto(settings.target.url);
+      await page.waitForSelector('body > div > main > div.l-content');
+      const imgTags = await page.$$('body > div > main > div.l-content > section > div > section > a > figure > img');
+  
+      for (const imgTag of imgTags) {
+        const propAlt = await imgTag.getProperty('alt');
+        const title = await propAlt.jsonValue();
+        if (!excludeWord.test(title)){
+          const propSrc = await imgTag.getProperty('src');
+          const src = await propSrc.jsonValue();
+          const result = src.match(/^https:\/\/static-mercari-jp-imgtr2.akamaized.net\/thumb\/photos\/(.+)_\d?\.jpg/);
+          if(result){
+            if (oldItemsId.indexOf(result[1]) === -1) {
+              const obj = {
+                id: result[1],
+                title: title,
+                src: result[0],
+                createdAt: new Date()
+              };
+              items.push(obj);
+              newItems.push(obj);
+            }
+          }
+        }
+      }
+
+      if (newItems.length > 0) {
+        const content = JSON.stringify(items);
+        fs.writeFile(filePath, content, (error) => {
+          if (error) {
+            console.log('error: ファイル書き込みエラーです');
+          } else {
+            console.log('success: ' + filePath + ' を上書き');
+          }
+        });
+      } else {
+        console.log('NewItem はありませんでした');
+      }
+
+      await browser.close();
+    })();
+  }
+});
+
+
