@@ -3,9 +3,41 @@
 const fs = require('fs');
 const path = require('path');
 const puppeteer = require('puppeteer');
+const Slack = require('node-slackr');
 const settings = require('./settings');
 const excludeWord = new RegExp(settings.target.excludeWord); 
 const filePath = path.join(__dirname, 'items.json');
+
+const postSlack = ((newItems) => {
+  const attachments = [];
+  for (const newItem of newItems) {
+    const fields = [];
+    const field = {
+      title: newItem.title,
+      value: '<https://item.mercari.com/jp/' + newItem.id + '/>'
+    };
+    fields.push(field);
+    const attachment = {
+      fields: fields,
+      image_url: newItem.src
+    };
+    attachments.push(attachment);
+  }
+  const slack = new Slack(settings.slack.webhookURL);
+  const slackMessage = {
+    channel: settings.slack.slackChannel,
+    username: 'メルカリチェッカー',
+    text: '新着アイテム',
+    attachments: attachments
+  };
+  slack.notify(slackMessage, (error, result) => {
+    if (error) {
+      console.log(error);
+    } else {
+      console.log(result);
+    }
+  });
+});
 
 fs.readFile(filePath, (error, result) => {
   if (error) {
@@ -64,10 +96,11 @@ fs.readFile(filePath, (error, result) => {
             console.log('error: ファイル書き込みエラーです');
           } else {
             console.log('success: ' + filePath + ' を上書き');
+            postSlack(newItems);
           }
         });
       } else {
-        console.log('NewItem はありませんでした');
+        console.log('newItem はありませんでした');
       }
 
       await browser.close();
