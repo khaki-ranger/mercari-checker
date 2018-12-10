@@ -5,7 +5,6 @@ const path = require('path');
 const puppeteer = require('puppeteer');
 const Slack = require('node-slackr');
 const cron = require('node-cron');
-
 let settings = undefined;
 if (!process.env.TARGET_URL) {
   settings = require('./settings');
