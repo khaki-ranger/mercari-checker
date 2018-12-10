@@ -6,7 +6,21 @@ const puppeteer = require('puppeteer');
 const Slack = require('node-slackr');
 const cron = require('node-cron');
 
-const settings = require('./settings');
+let settings = undefined;
+if (!process.env.TARGET_URL) {
+  settings = require('./settings');
+} else {
+  settings = {
+    target: {
+      url: process.env.TARGET_URL,
+      excludeWord: process.env.EXCLUDE_WORD
+    },
+    slack: {
+      webhookURL: process.env.WEBHOOK_URL,
+      slackChannel: process.env.SLACK_CHANNEL
+    }
+  }
+}
 const excludeWord = new RegExp(settings.target.excludeWord); 
 const filePath = path.join(__dirname, 'items.json');
 

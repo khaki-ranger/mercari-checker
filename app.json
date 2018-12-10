@@ -1,0 +1,7 @@
+{
+  "name": "mercari-checker",
+  "description": "mercari-checker",
+  "logo": "",
+  "keywords": ["node"],
+  "image": "heroku/nodejs"
+}

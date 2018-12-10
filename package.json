@@ -4,7 +4,7 @@
   "description": "メルカリの商品をチェック",
   "main": "app.js",
   "scripts": {
-    "test": "node test.js"
+    "start": "node app.js"
   },
   "author": "YoheiTerashima",
   "license": "ISC",
@@ -12,5 +12,8 @@
     "node-cron": "^2.0.3",
     "node-slackr": "^1.0.1",
     "puppeteer": "^1.11.0"
+  },
+  "engines": {
+    "node": "9.11.1"
   }
 }
