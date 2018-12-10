@@ -9,6 +9,7 @@
   "author": "YoheiTerashima",
   "license": "ISC",
   "dependencies": {
+    "node-cron": "^2.0.3",
     "node-slackr": "^1.0.1",
     "puppeteer": "^1.11.0"
   }
